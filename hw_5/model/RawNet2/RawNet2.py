@@ -46,8 +46,6 @@ class RawNet2(BaseModel):
         x = self.resblock5(x)
         x = self.resblock6(x)
         x = self.leaky_relu(self.bn2(x))
-        x = x.transpose(1, 2)
-        _, x = self.gru(x)
-        x = x[-1, :, :]
+        x = self.gru(x.transpose(1, 2))[0][:, -1, :]
         x = self.linear_final(x)
         return {"predicts": x}

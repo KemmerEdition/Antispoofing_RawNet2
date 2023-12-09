@@ -120,11 +120,11 @@ class Trainer(BaseTrainer):
                 # because we are interested in recent train metrics
                 last_train_metrics = self.train_metrics.result()
                 self.train_metrics.reset()
-            if batch_idx + 1 >= self.len_epoch:
+            if batch_idx >= self.len_epoch:
                 break
         log = last_train_metrics
-        if self.lr_scheduler is not None:
-            self.lr_scheduler.step()
+        # if self.lr_scheduler is not None:
+        #     self.lr_scheduler.step()
 
         for part, dataloader in self.evaluation_dataloaders.items():
             val_log = self._evaluation_epoch(epoch, part, dataloader)
@@ -136,17 +136,15 @@ class Trainer(BaseTrainer):
         batch = self.move_batch_to_device(batch, self.device)
         outputs = self.model(**batch)
         batch.update(outputs)
+        batch["loss"] = self.criterion(**batch)
         if is_train:
-            loss = self.criterion(**batch)
-            batch.update(loss)
             batch["loss"].backward()
             self._clip_grad_norm()
             self.optimizer.step()
+            self.lr_scheduler.step()
             # metrics.update("grad_norm", self.get_grad_norm())
             self.optimizer.zero_grad()
-            if self.lr_scheduler is not None:
-                self.lr_scheduler.step()
-            metrics.update("loss", batch["loss"].item())
+        metrics.update("loss", batch["loss"].item())
         # for met in self.metrics:
         #     metrics.update(met.name, met(**batch))
         return batch
@@ -231,7 +229,7 @@ class Trainer(BaseTrainer):
         parameters = [p for p in parameters if p.grad is not None]
         total_norm = torch.norm(
             torch.stack(
-                [torch.norm(torch.nan_to_num(p.grad.detach(), nan=0), norm_type).cpu() for p in parameters]
+                [torch.norm(p.grad.detach(), norm_type).cpu() for p in parameters]
             ),
             norm_type,
         )
