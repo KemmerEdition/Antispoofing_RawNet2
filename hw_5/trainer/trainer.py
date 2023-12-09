@@ -136,8 +136,10 @@ class Trainer(BaseTrainer):
         batch = self.move_batch_to_device(batch, self.device)
         outputs = self.model(**batch)
         batch.update(outputs)
-        batch["loss"] = self.criterion(**batch)
+        # batch["loss"] = self.criterion(**batch)
         if is_train:
+            loss = self.criterion(**batch)
+            batch.update(loss)
             batch["loss"].backward()
             self._clip_grad_norm()
             self.optimizer.step()
