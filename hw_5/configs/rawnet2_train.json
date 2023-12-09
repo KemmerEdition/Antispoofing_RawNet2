@@ -1,0 +1,83 @@
+{
+  "name": "rawnet2_train",
+  "n_gpu": 1,
+  "arch": {
+    "type": "RawNet2",
+    "args": {
+      "sinc_out": 1024,
+      "sinc_filter": 128,
+      "res_channels_first": 20,
+      "res_channels_sec": 128,
+      "gru_units": 1024,
+      "num_gru_layers": 3,
+      "num_classes": 2
+    }
+  },
+  "data": {
+    "train": {
+      "batch_size": 32,
+      "num_workers": 0,
+      "datasets": [
+        {
+          "type": "CMData",
+          "args": {
+            "part": "train",
+            "data_dir": "/kaggle/input/asvpoof-2019-dataset/LA/LA",
+            "total_samp": 64000
+          }
+        }
+      ]
+    },
+    "test": {
+      "batch_size": 32,
+      "num_workers": 0,
+      "datasets": [
+        {
+          "type": "CMData",
+          "args": {
+            "part": "eval",
+            "data_dir": "/kaggle/input/asvpoof-2019-dataset/LA/LA",
+            "total_samp": 64000
+          }
+        }
+      ]
+    }
+  },
+  "optimizer": {
+    "type": "AdamW",
+    "args": {
+      "lr": 1e-4,
+      "weight_decay": 1e-4
+    }
+  },
+  "loss": {
+    "type": "CMLoss",
+    "args": {}
+  },
+  "metrics": [
+    {
+      "type": "EERMetric",
+      "args": {
+        "name": "EERMetric"
+      }
+    }
+  ],
+  "lr_scheduler": {
+        "type": "ExponentialLR",
+        "args": {
+            "gamma": 0.99999
+        }
+    },
+  "trainer": {
+    "epochs": 60,
+    "save_dir": "saved/",
+    "save_period": 5,
+    "verbosity": 2,
+    "monitor": "min val_loss",
+    "early_stop": 100,
+    "visualize": "wandb",
+    "wandb_project": "rawnet2",
+    "len_epoch": 1500,
+    "grad_norm_clip": 100
+  }
+}
