@@ -17,10 +17,10 @@ class CMData(Dataset):
 
         if part == "train":
             add_val = "trn"
-            dir_audio = self.data_dir / "ASVspoof2019_LA_cm_protocols" / f"ASVspoof.LA.cm.{part}.{add_val}.txt"
+            dir_audio = self.data_dir / "ASVspoof2019_LA_cm_protocols" / f"ASVspoof2019.LA.cm.{part}.{add_val}.txt"
         else:
             add_val = "trl"
-            dir_audio = self.data_dir / "ASVspoof2019_LA_cm_protocols" / f"ASVspoof.LA.cm.{part}.{add_val}.txt"
+            dir_audio = self.data_dir / "ASVspoof2019_LA_cm_protocols" / f"ASVspoof2019.LA.cm.{part}.{add_val}.txt"
 
         with open(dir_audio, 'r', encoding='utf-8') as f:
             for elem in f.readlines():
