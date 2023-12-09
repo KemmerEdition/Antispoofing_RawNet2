@@ -102,7 +102,7 @@ class Trainer(BaseTrainer):
                     continue
                 else:
                     raise e
-            # self.train_metrics.update("grad norm", self.get_grad_norm())
+            self.train_metrics.update("grad norm", self.get_grad_norm())
             if batch_idx % self.log_step == 0:
                 self.writer.set_step((epoch - 1) * self.len_epoch + batch_idx)
                 self.logger.debug(
@@ -142,7 +142,7 @@ class Trainer(BaseTrainer):
             batch["loss"].backward()
             self._clip_grad_norm()
             self.optimizer.step()
-            metrics.update("grad_norm", self.get_grad_norm())
+            # metrics.update("grad_norm", self.get_grad_norm())
             self.optimizer.zero_grad()
             if self.lr_scheduler is not None:
                 self.lr_scheduler.step()
