@@ -58,7 +58,6 @@
     {
       "type": "EERMetric",
       "args": {
-        "name": "EERMetric"
       }
     }
   ],
