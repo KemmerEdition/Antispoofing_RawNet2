@@ -7,7 +7,7 @@ from torch.utils.data import Dataset
 
 class CMData(Dataset):
     def __init__(self, part, data_dir, total_samp, limit=None, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+        super().__init__()
 
         self.data_dir = Path(data_dir)
         self.part = part
