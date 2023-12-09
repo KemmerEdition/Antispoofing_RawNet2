@@ -77,6 +77,6 @@
     "visualize": "wandb",
     "wandb_project": "rawnet2",
     "len_epoch": 1500,
-    "grad_norm_clip": 100
+    "grad_norm_clip": 10
   }
 }
