@@ -39,7 +39,7 @@ class RawNet2(BaseModel):
         # nb_s = x.shape[0]
         # len_s = x.shape[1]
         # x = x.view(nb_s, 1, len_s)
-        x = torch.abs(self.sinc(x))
+        x = self.sinc(x)
         x = self.leaky_relu(self.bn1(self.max_pool(x)))
         x = self.resblock1(x)
         x = self.resblock2(x)
