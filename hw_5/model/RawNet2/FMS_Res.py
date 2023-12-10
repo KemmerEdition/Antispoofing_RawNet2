@@ -46,8 +46,7 @@ class ResBlock(nn.Module):
         self.fms_blok = FMS(out_channels)
 
     def forward(self, x):
-        # if not self.first:
-        #     res = self.leaky_relu(self.bn1(x))
+
         res = self.list_layers(x)
         # res = self.conv(res)
         # res = self.conv2(self.leaky_relu(self.bn2(res)))

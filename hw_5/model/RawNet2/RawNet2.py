@@ -35,7 +35,7 @@ class RawNet2(BaseModel):
 
     def forward(self, audio, **kwargs):
         x = audio.unsqueeze(1)
-        x = self.sinc(x)
+        x = torch.abs(self.sinc(x))
         x = self.leaky_relu(self.bn1(self.max_pool(x)))
         x = self.resblock1(x)
         x = self.resblock2(x)
