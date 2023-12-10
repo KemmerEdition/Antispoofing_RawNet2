@@ -27,15 +27,15 @@ class ResBlock(nn.Module):
         list_layers = []
         if not first:
             list_layers += [nn.BatchNorm1d(in_channels), nn.LeakyReLU(negative_slope=0.3)]
-        self.bn1 = nn.BatchNorm1d(in_channels)
-        self.leaky_relu = nn.LeakyReLU(negative_slope=0.3)
+        # self.bn1 = nn.BatchNorm1d(in_channels)
+        # self.leaky_relu = nn.LeakyReLU(negative_slope=0.3)
         list_layers += [nn.Conv1d(in_channels, out_channels, kernel_size=3, padding=1),
                         nn.BatchNorm1d(out_channels),
                         nn.LeakyReLU(negative_slope=0.3),
                         nn.Conv1d(out_channels, out_channels, kernel_size=3, padding=1)]
-        self.conv = nn.Conv1d(in_channels, out_channels, kernel_size=3, padding=1)
-        self.bn2 = nn.BatchNorm1d(out_channels)
-        self.conv2 = nn.Conv1d(out_channels, out_channels, kernel_size=3, padding=1)
+        # self.conv = nn.Conv1d(in_channels, out_channels, kernel_size=3, padding=1)
+        # self.bn2 = nn.BatchNorm1d(out_channels)
+        # self.conv2 = nn.Conv1d(out_channels, out_channels, kernel_size=3, padding=1)
         self.list_layers = nn.Sequential(*list_layers)
         if in_channels != out_channels:
             self.flag = True
