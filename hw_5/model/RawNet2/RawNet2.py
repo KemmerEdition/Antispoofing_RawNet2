@@ -52,5 +52,5 @@ class RawNet2(BaseModel):
         self.gru.flatten_parameters()
         x, _ = self.gru(x)
         x = x[:, -1, :]
-        x = self.liner_final(self.liner_semi_final(x))
+        x = self.linear_final(self.liner_semi_final(x))
         return {"predicts": x}
