@@ -4,7 +4,7 @@
   "arch": {
     "type": "RawNet2",
     "args": {
-      "sinc_out": 128,
+      "sinc_out": 20,
       "sinc_filter": 1024,
       "res_channels_first": 20,
       "res_channels_sec": 128,

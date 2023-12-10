@@ -16,14 +16,14 @@ class RawNet2(BaseModel):
                  num_classes):
         super().__init__()
 
-        self.sinc = SincConv_fast(sinc_out, kernel_size=sinc_filter)
+        self.sinc = SincConv_fast(20, kernel_size=sinc_filter)
         self.max_pool = nn.MaxPool1d(3)
         self.bn1 = nn.BatchNorm1d(sinc_out)
         self.leaky_relu = nn.LeakyReLU(negative_slope=0.3)
 
         self.resblock1 = ResBlock(sinc_out, res_channels_first, True)
-        self.resblock2 = ResBlock(res_channels_first, res_channels_sec)
-        self.resblock3 = ResBlock(res_channels_sec, res_channels_sec)
+        self.resblock2 = ResBlock(res_channels_first, res_channels_first)
+        self.resblock3 = ResBlock(res_channels_first, res_channels_sec)
         self.resblock4 = ResBlock(res_channels_sec, res_channels_sec)
         self.resblock5 = ResBlock(res_channels_sec, res_channels_sec)
         self.resblock6 = ResBlock(res_channels_sec, res_channels_sec)
