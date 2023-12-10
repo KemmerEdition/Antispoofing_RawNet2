@@ -16,10 +16,10 @@ class RawNet2(BaseModel):
                  num_classes):
         super().__init__()
 
-        self.sinc = SincConv_fast(out_channels=sinc_out, kernel_size=sinc_filter)
+        self.sinc = SincConv_fast(sinc_out, kernel_size=sinc_filter)
         self.max_pool = nn.MaxPool1d(3)
         self.bn1 = nn.BatchNorm1d(sinc_out)
-        self.leaky_relu = nn.LeakyReLU()
+        self.leaky_relu = nn.LeakyReLU(negative_slope=0.3)
 
         self.resblock1 = ResBlock(sinc_out, res_channels_first)
         self.resblock2 = ResBlock(res_channels_first, res_channels_sec)
@@ -30,13 +30,15 @@ class RawNet2(BaseModel):
         self.bn2 = nn.BatchNorm1d(res_channels_sec)
 
         self.gru = nn.GRU(res_channels_sec, gru_units, num_gru_layers, batch_first=True)
+        self.liner_semi_final = nn.Linear(gru_units, gru_units)
         self.linear_final = nn.Linear(gru_units, num_classes)
 
     def forward(self, audio, **kwargs):
-        x = audio
-        nb_s = x.shape[0]
-        len_s = x.shape[1]
-        x = x.view(nb_s, 1, len_s)
+        x = audio.unsqueeze(1)
+        # x = audio
+        # nb_s = x.shape[0]
+        # len_s = x.shape[1]
+        # x = x.view(nb_s, 1, len_s)
         x = torch.abs(self.sinc(x))
         x = self.leaky_relu(self.bn1(self.max_pool(x)))
         x = self.resblock1(x)
@@ -46,6 +48,9 @@ class RawNet2(BaseModel):
         x = self.resblock5(x)
         x = self.resblock6(x)
         x = self.leaky_relu(self.bn2(x))
-        x = self.gru(x.transpose(1, 2))[0][:, -1, :]
-        x = self.linear_final(x)
+        x = x.transpose(1, 2)
+        self.gru.flatten_parameters()
+        x, _ = self.gru(x)
+        x = x[:, -1, :]
+        x = self.liner_final(self.liner_semi_final(x))
         return {"predicts": x}

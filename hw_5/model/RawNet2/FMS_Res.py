@@ -22,11 +22,11 @@ class FMS(nn.Module):
 
 
 class ResBlock(nn.Module):
-    def __init__(self, in_channels, out_channels):
+    def __init__(self, in_channels, out_channels, first=False):
         super().__init__()
-
+        self.first = first
         self.bn1 = nn.BatchNorm1d(in_channels)
-        self.leaky_relu = nn.LeakyReLU()
+        self.leaky_relu = nn.LeakyReLU(negative_slope=0.3)
         self.conv = nn.Conv1d(in_channels, out_channels, kernel_size=3, padding=1)
         self.bn2 = nn.BatchNorm1d(out_channels)
         self.conv2 = nn.Conv1d(out_channels, out_channels, kernel_size=3, padding=1)
@@ -39,7 +39,9 @@ class ResBlock(nn.Module):
         self.fms_blok = FMS(out_channels)
 
     def forward(self, x):
-        res = self.conv(self.leaky_relu(self.bn1(x)))
+        if not self.first:
+            res = self.leaky_relu(self.bn1(x))
+        res = self.conv(res)
         res = self.conv2(self.leaky_relu(self.bn2(res)))
         if self.flag:
             x = self.proj(x)

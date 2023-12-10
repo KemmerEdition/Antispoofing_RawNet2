@@ -68,15 +68,15 @@
         }
     },
   "trainer": {
-    "epochs": 35,
+    "epochs": 100,
     "save_dir": "saved/",
-    "save_period": 3,
+    "save_period": 5,
     "verbosity": 2,
     "monitor": "min val_loss",
     "early_stop": 100,
     "visualize": "wandb",
     "wandb_project": "rawnet2",
-    "len_epoch": 5000,
+    "len_epoch": 1500,
     "grad_norm_clip": 10
   }
 }
