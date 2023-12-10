@@ -71,14 +71,14 @@ class SincConv_fast(nn.Module):
         high_hz = self.sample_rate / 2 - (self.min_low_hz + self.min_band_hz)
 
         # S1 - Mel-scale
-        # mel = np.linspace(self.to_mel(low_hz),
-        #                   self.to_mel(high_hz),
-        #                   self.out_channels + 1)
-        # hz = self.to_hz(mel)
+        mel = np.linspace(self.to_mel(low_hz),
+                          self.to_mel(high_hz),
+                          self.out_channels + 1)
+        hz = self.to_hz(mel)
         # S2 - Inverse-Mel-Scale
         # S3 - Linear-Scaled
-        mel = np.linspace(low_hz, high_hz, self.out_channels + 2)
-        hz = mel
+        # mel = np.linspace(low_hz, high_hz, self.out_channels + 1)
+        # hz = mel
 
         # filter lower frequency (out_channels, 1)
         self.low_hz_ = nn.Parameter(torch.Tensor(hz[:-1]).view(-1, 1))
