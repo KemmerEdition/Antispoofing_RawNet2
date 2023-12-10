@@ -16,7 +16,7 @@
   "data": {
     "train": {
       "batch_size": 32,
-      "num_workers": 0,
+      "num_workers": 6,
       "datasets": [
         {
           "type": "CMData",
@@ -30,7 +30,7 @@
     },
     "test": {
       "batch_size": 32,
-      "num_workers": 0,
+      "num_workers": 6,
       "datasets": [
         {
           "type": "CMData",
@@ -44,9 +44,9 @@
     }
   },
   "optimizer": {
-    "type": "AdamW",
+    "type": "Adam",
     "args": {
-      "lr": 1e-4,
+      "lr": 0.0001,
       "weight_decay": 1e-4
     }
   },
@@ -68,15 +68,15 @@
         }
     },
   "trainer": {
-    "epochs": 60,
+    "epochs": 35,
     "save_dir": "saved/",
-    "save_period": 5,
+    "save_period": 3,
     "verbosity": 2,
     "monitor": "min val_loss",
     "early_stop": 100,
     "visualize": "wandb",
     "wandb_project": "rawnet2",
-    "len_epoch": 1500,
+    "len_epoch": 5000,
     "grad_norm_clip": 10
   }
 }
