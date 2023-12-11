@@ -9,7 +9,7 @@
       "res_channels_first": 20,
       "res_channels_sec": 128,
       "gru_units": 1024,
-      "num_gru_layers": 1,
+      "num_gru_layers": 3,
       "num_classes": 2
     }
   },
@@ -46,8 +46,8 @@
   "optimizer": {
     "type": "Adam",
     "args": {
-      "lr": 0.0001,
-      "weight_decay": 1e-4
+      "lr": 0.0001
+
     }
   },
   "loss": {
