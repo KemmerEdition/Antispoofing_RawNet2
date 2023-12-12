@@ -27,7 +27,7 @@ class RawNet2(BaseModel):
         self.resblock4 = ResBlock(res_channels_sec, res_channels_sec)
         self.resblock5 = ResBlock(res_channels_sec, res_channels_sec)
         self.resblock6 = ResBlock(res_channels_sec, res_channels_sec)
-        self.bn2 = nn.BatchNorm1d(res_channels_sec)
+        # self.bn2 = nn.BatchNorm1d(res_channels_sec)
 
         self.gru = nn.GRU(res_channels_sec, gru_units, num_gru_layers, batch_first=True)
         self.liner_semi_final = nn.Linear(gru_units, gru_units)
