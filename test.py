@@ -4,6 +4,8 @@ import os
 from pathlib import Path
 
 import torch
+import torchaudio
+import torch.nn.functional as F
 from tqdm import tqdm
 
 import hw_5.model as module_model
@@ -21,14 +23,11 @@ def main(config, out_file):
     # define cpu or gpu if possible
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    # text_encoder
-    text_encoder = config.get_text_encoder()
-
     # setup data_loader instances
-    dataloaders = get_dataloaders(config)
+    # dataloaders = get_dataloaders(config)
 
     # build model architecture
-    model = config.init_obj(config["arch"], module_model, n_class=len(text_encoder))
+    model = config.init_obj(config["arch"], module_model)
     logger.info(model)
 
     logger.info("Loading checkpoint: {} ...".format(config.resume))
@@ -41,38 +40,19 @@ def main(config, out_file):
     # prepare model for testing
     model = model.to(device)
     model.eval()
+    test_folder = ['/content/hw_as/hw_5/test_data/audio_1.flac',
+                   '/content/hw_as/hw_5/test_data/audio_2.flac',
+                   '/content/hw_as/hw_5/test_data/audio_3.flac',
+                   '/content/hw_as/hw_5/test_data/audio_4.flac',
+                   '/content/hw_as/hw_5/test_data/audio_5.flac']
 
-    results = []
-
-    with torch.no_grad():
-        for batch_num, batch in enumerate(tqdm(dataloaders["test"])):
-            batch = Trainer.move_batch_to_device(batch, device)
-            output = model(**batch)
-            if type(output) is dict:
-                batch.update(output)
-            else:
-                batch["logits"] = output
-            batch["log_probs"] = torch.log_softmax(batch["logits"], dim=-1)
-            batch["log_probs_length"] = model.transform_input_lengths(
-                batch["spectrogram_length"]
-            )
-            batch["probs"] = batch["log_probs"].exp().cpu()
-            batch["argmax"] = batch["probs"].argmax(-1)
-            for i in range(len(batch["text"])):
-                argmax = batch["argmax"][i]
-                argmax = argmax[: int(batch["log_probs_length"][i])]
-                results.append(
-                    {
-                        "ground_trurh": batch["text"][i],
-                        "pred_text_argmax": text_encoder.ctc_decode(argmax.cpu().numpy()),
-                        "pred_text_beam_search": text_encoder.ctc_beam_search(
-                            batch["probs"][i], batch["log_probs_length"][i], beam_size=100
-                        )[:10],
-                    }
-                )
-    with Path(out_file).open("w") as f:
-        json.dump(results, f, indent=2)
-
+    for audio in test_folder:
+        file = torchaudio.load(audio)[0]
+        file = file.unsqueeze(0)
+        predicts = model(file)
+        predict_proba = F.softmax(predicts['predicts'], dim=-1)
+        bonafide, spoof = predict_proba[:, 1], predict_proba[:, 0]
+        print(f"test_file: {audio}, bonafide_proba: {bonafide.item()}, spoof_proba: {spoof.item()}")
 
 if __name__ == "__main__":
     args = argparse.ArgumentParser(description="PyTorch Template")
@@ -144,29 +124,29 @@ if __name__ == "__main__":
             config.config.update(json.load(f))
 
     # if `--test-data-folder` was provided, set it as a default test set
-    if args.test_data_folder is not None:
-        test_data_folder = Path(args.test_data_folder).absolute().resolve()
-        assert test_data_folder.exists()
-        config.config["data"] = {
-            "test": {
-                "batch_size": args.batch_size,
-                "num_workers": args.jobs,
-                "datasets": [
-                    {
-                        "type": "CustomDirAudioDataset",
-                        "args": {
-                            "audio_dir": str(test_data_folder / "audio"),
-                            "transcription_dir": str(
-                                test_data_folder / "transcriptions"
-                            ),
-                        },
-                    }
-                ],
-            }
-        }
-
-    assert config.config.get("data", {}).get("test", None) is not None
-    config["data"]["test"]["batch_size"] = args.batch_size
-    config["data"]["test"]["n_jobs"] = args.jobs
+    # if args.test_data_folder is not None:
+    #     test_data_folder = Path(args.test_data_folder).absolute().resolve()
+    #     assert test_data_folder.exists()
+    #     config.config["data"] = {
+    #         "test": {
+    #             "batch_size": args.batch_size,
+    #             "num_workers": args.jobs,
+    #             "datasets": [
+    #                 {
+    #                     "type": "CustomDirAudioDataset",
+    #                     "args": {
+    #                         "audio_dir": str(test_data_folder / "audio"),
+    #                         "transcription_dir": str(
+    #                             test_data_folder / "transcriptions"
+    #                         ),
+    #                     },
+    #                 }
+    #             ],
+    #         }
+    #     }
+    #
+    # assert config.config.get("data", {}).get("test", None) is not None
+    # config["data"]["test"]["batch_size"] = args.batch_size
+    # config["data"]["test"]["n_jobs"] = args.jobs
 
     main(config, args.output)

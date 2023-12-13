@@ -16,7 +16,7 @@
   "data": {
     "train": {
       "batch_size": 32,
-      "num_workers": 6,
+      "num_workers": 8,
       "datasets": [
         {
           "type": "CMData",
@@ -30,7 +30,7 @@
     },
     "test": {
       "batch_size": 32,
-      "num_workers": 6,
+      "num_workers": 8,
       "datasets": [
         {
           "type": "CMData",
