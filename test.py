@@ -21,8 +21,8 @@ def main(config, out_file):
     logger = config.get_logger("test")
 
     # define cpu or gpu if possible
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
+    device = torch.device("cpu")
+# "cuda" if torch.cuda.is_available() else
     # setup data_loader instances
     # dataloaders = get_dataloaders(config)
 
@@ -36,7 +36,6 @@ def main(config, out_file):
     if config["n_gpu"] > 1:
         model = torch.nn.DataParallel(model)
     model.load_state_dict(state_dict)
-
     # prepare model for testing
     model = model.to(device)
     model.eval()
@@ -44,15 +43,18 @@ def main(config, out_file):
                    '/content/hw_as/hw_5/test_data/audio_2.flac',
                    '/content/hw_as/hw_5/test_data/audio_3.flac',
                    '/content/hw_as/hw_5/test_data/audio_4.flac',
-                   '/content/hw_as/hw_5/test_data/audio_5.flac']
+                   '/content/hw_as/hw_5/test_data/audio_5.flac',
+                   '/content/hw_as/hw_5/test_data/france.flac']
 
     for audio in test_folder:
-        file = torchaudio.load(audio)[0]
+        file = torchaudio.load(audio)[0].reshape(-1)
         file = file.unsqueeze(0)
         predicts = model(file)
-        predict_proba = F.softmax(predicts['predicts'], dim=-1)
-        bonafide, spoof = predict_proba[:, 1], predict_proba[:, 0]
-        print(f"test_file: {audio}, bonafide_proba: {bonafide.item()}, spoof_proba: {spoof.item()}")
+        predict_proba =F.softmax(predicts['predicts'], dim=-1)
+        print(predict_proba)
+        bonafide = predict_proba[:, 1]
+        spoof = predict_proba[:, 0]
+        print(f"test_file: {audio}, bonafide_proba: {int(bonafide[0].item()*100)}, spoof_proba: {int(spoof[0].item()*100)}")
 
 if __name__ == "__main__":
     args = argparse.ArgumentParser(description="PyTorch Template")
@@ -122,31 +124,5 @@ if __name__ == "__main__":
     if args.config is not None:
         with Path(args.config).open() as f:
             config.config.update(json.load(f))
-
-    # if `--test-data-folder` was provided, set it as a default test set
-    # if args.test_data_folder is not None:
-    #     test_data_folder = Path(args.test_data_folder).absolute().resolve()
-    #     assert test_data_folder.exists()
-    #     config.config["data"] = {
-    #         "test": {
-    #             "batch_size": args.batch_size,
-    #             "num_workers": args.jobs,
-    #             "datasets": [
-    #                 {
-    #                     "type": "CustomDirAudioDataset",
-    #                     "args": {
-    #                         "audio_dir": str(test_data_folder / "audio"),
-    #                         "transcription_dir": str(
-    #                             test_data_folder / "transcriptions"
-    #                         ),
-    #                     },
-    #                 }
-    #             ],
-    #         }
-    #     }
-    #
-    # assert config.config.get("data", {}).get("test", None) is not None
-    # config["data"]["test"]["batch_size"] = args.batch_size
-    # config["data"]["test"]["n_jobs"] = args.jobs
 
     main(config, args.output)
