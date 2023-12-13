@@ -27,6 +27,7 @@ class RawNet2(BaseModel):
         self.resblock4 = ResBlock(res_channels_sec, res_channels_sec)
         self.resblock5 = ResBlock(res_channels_sec, res_channels_sec)
         self.resblock6 = ResBlock(res_channels_sec, res_channels_sec)
+        self.leaky_relu2 = nn.LeakyReLU(negative_slope=0.3)
         self.bn2 = nn.BatchNorm1d(res_channels_sec)
 
         self.gru = nn.GRU(res_channels_sec, gru_units, num_gru_layers, batch_first=True)
@@ -43,7 +44,7 @@ class RawNet2(BaseModel):
         x = self.resblock4(x)
         x = self.resblock5(x)
         x = self.resblock6(x)
-        x = self.leaky_relu(self.bn2(x))
+        x = self.leaky_relu2(self.bn2(x))
         x = x.transpose(1, 2)
         self.gru.flatten_parameters()
         x, _ = self.gru(x)

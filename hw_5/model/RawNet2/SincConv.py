@@ -46,7 +46,7 @@ class SincConv_fast(nn.Module):
             msg = "SincConv only support one input channel (here, in_channels = {%i})" % (in_channels)
             raise ValueError(msg)
 
-        self.out_channels = out_channels
+        self.out_channels = out_channels + 1
         self.kernel_size = kernel_size
 
         # Forcing the filters to be odd (i.e, perfectly symmetrics)
@@ -67,18 +67,18 @@ class SincConv_fast(nn.Module):
         self.min_band_hz = min_band_hz
 
         # initialize filterbanks such that they are equally spaced in Mel scale
-        low_hz = 30
+        low_hz = 0
         high_hz = self.sample_rate / 2 - (self.min_low_hz + self.min_band_hz)
 
         # S1 - Mel-scale
-        mel = np.linspace(self.to_mel(low_hz),
-                          self.to_mel(high_hz),
-                          self.out_channels + 1)
-        hz = self.to_hz(mel)
+        # mel = np.linspace(self.to_mel(low_hz),
+        #                   self.to_mel(high_hz),
+        #                   self.out_channels + 1)
+        # hz = self.to_hz(mel)
         # S2 - Inverse-Mel-Scale
         # S3 - Linear-Scaled
-        # mel = np.linspace(low_hz, high_hz, self.out_channels + 1)
-        # hz = mel
+        mel = np.linspace(low_hz, high_hz, self.out_channels + 2)
+        hz = mel
 
         # filter lower frequency (out_channels, 1)
         self.low_hz_ = nn.Parameter(torch.Tensor(hz[:-1]).view(-1, 1))

@@ -32,7 +32,7 @@ def main(config):
     # build model architecture, then print to console
     model = config.init_obj(config["arch"], module_arch)
     logger.info(model)
-    # model.sinc.requires_grad_(False)
+    model.sinc.requires_grad_(False)
 
     # prepare for (multi-device) GPU training
     device, device_ids = prepare_device(config["n_gpu"])
