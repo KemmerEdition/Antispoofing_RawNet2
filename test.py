@@ -44,17 +44,18 @@ def main(config, out_file):
                    '/content/hw_as/hw_5/test_data/audio_3.flac',
                    '/content/hw_as/hw_5/test_data/audio_4.flac',
                    '/content/hw_as/hw_5/test_data/audio_5.flac',
-                   '/content/hw_as/hw_5/test_data/france.flac']
+                   '/content/hw_as/hw_5/test_data/france.flac',
+                   '/content/hw_as/hw_5/test_data/na.flac']
 
     for audio in test_folder:
         file = torchaudio.load(audio)[0].reshape(-1)
         file = file.unsqueeze(0)
         predicts = model(file)
         predict_proba =F.softmax(predicts['predicts'], dim=-1)
-        print(predict_proba)
+        # print(predict_proba)
         bonafide = predict_proba[:, 1]
         spoof = predict_proba[:, 0]
-        print(f"test_file: {audio}, bonafide_proba: {int(bonafide[0].item()*100)}, spoof_proba: {int(spoof[0].item()*100)}")
+        print(f"test_file: {audio}, bonafide_proba: {int(round(bonafide[0].item()*100))}, spoof_proba: {int(round(spoof[0].item()*100))}")
 
 if __name__ == "__main__":
     args = argparse.ArgumentParser(description="PyTorch Template")
