@@ -22,7 +22,7 @@ def main(config, out_file):
 
     # define cpu or gpu if possible
     device = torch.device("cpu")
-# "cuda" if torch.cuda.is_available() else
+
     # setup data_loader instances
     # dataloaders = get_dataloaders(config)
 
