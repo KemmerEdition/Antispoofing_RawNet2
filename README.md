@@ -1,82 +1,54 @@
-# ASR project barebones
+# Anti-Spoofing (RawNet2) project
+
+ This is a repository for Anti-Spoofing project based on one homework of DLA course (HSE). The task is to determine whether the audio is real (human) or created using special algorithms (TTS, VC, mix).
+## Repository structure
+
+`hw_as` - directory included all project files (only what was used in this project is indicated).
+* `base` - base classes for model and train.
+* `collate_fn` - function for collation.
+* `datasets` - functions and class for parsing protocols from ASVSpoof2019 (Dataset), audio preprocessing (we need 4 sec during both train and evaluation part).
+* `configs` - configs with params for training.
+* `logger` - files for logging.
+* `loss` - definition for loss computation (Weighted-CrossEntropy).
+* `metric` - Equal Error Rate (from [HSE DLA Course, week10](https://github.com/XuMuK1/dla2023/blob/2023/hw5_as/calculate_eer.py)).
+* `model` - RawNet2 model architecture (from [END-TO-END ANTI-SPOOFING WITH RAWNET2](https://arxiv.org/pdf/2011.01108.pdf)).
+* `test_data` - this folder contains 7 examples of audio files for test.
+* `trainer` - train loop, logging in W&B.
+* `utils` - crucial functions (parse_config, object_loading, utils).
 
 ## Installation guide
 
-< Write your installation guide here >
+As usual, clone repository, change directory and install requirements:
 
 ```shell
-pip install -r ./requirements.txt
+!git clone https://github.com/KemmerEdition/hw_as.git
+!cd /content/hw_as
+!pip install -r requirements.txt
 ```
-
-## Recommended implementation order
-
-You might be a little intimidated by the number of folders and classes. Try to follow this steps to gradually undestand
-the workflow.
-
-1) Test `hw_5/tests/test_dataset.py`  and `hw_5/tests/test_config.py` and make sure everythin works for you
-2) Implement missing functions to fix tests in  `hw_5\tests\test_text_encoder.py`
-3) Implement missing functions to fix tests in  `hw_5\tests\test_dataloader.py`
-4) Implement functions in `hw_asr\metric\utils.py`
-5) Implement missing function to run `train.py` with a baseline model
-6) Write your own model and try to overfit it on a single batch
-7) Implement ctc beam search and add metrics to calculate WER and CER over hypothesis obtained from beam search.
-8) ~~Pain and suffering~~ Implement your own models and train them. You've mastered this template when you can tune your
-   experimental setup just by tuning `configs.json` file and running `train.py`
-9) Don't forget to write a report about your work
-10) Get hired by Google the next day
-
-## Before submitting
-
-0) Make sure your projects run on a new machine after complemeting the installation guide or by 
-   running it in docker container.
-1) Search project for `# TODO: your code here` and implement missing functionality
-2) Make sure all tests work without errors
+## Train
+Train model with command below (you should use Kaggle for training because there is a dataset needed in this task. You need to add the [dataset](https://www.kaggle.com/datasets/awsaf49/asvpoof-2019-dataset) to your workspace, only then run the script).
    ```shell
-   python -m unittest discover hw_5/tests
+   !python -m train -c hw_5/configs/rawnet2_train.json
    ```
-3) Make sure `test.py` works fine and works as expected. You should create files `default_test_config.json` and your
-   installation guide should download your model checpoint and configs in `default_test_model/checkpoint.pth`
-   and `default_test_model/config.json`.
+If you want to resume training from checkpoint, use command below.
    ```shell
-   python test.py \
-      -c default_test_config.json \
-      -r default_test_model/checkpoint.pth \
-      -t test_data \
-      -o test_result.json
+   !python -m train -c hw_5/configs/rawnet2_train.json -r checkpoint-epoch15-0.pth
    ```
-4) Use `train.py` for training
+## Test 
+You only need to run following commands (download checkpoint of my model, run test.py), wait some time and enjoy.
 
+You should test this on Google Colab (GPU to prevent any problems with tensors on different devices) or the path to the test audio directory should be changed in test.py (for test you should use second one).
+   ```shell
+#   Epoch 15
+   !gdown --id 19JL64GGojQJmn5QDU-y5eObtT6hh7rNA
+#   Epoch 100
+   !gdown --id 1mbUiJdaIkyLcDnAwLHLtNJvhaGLoX99z
+  ```
+   ```shell
+!python -m test -c hw_5/configs/rawnet2_train.json -r checkpoint-epoch100.pth 
+   ```
+Enjoy!
 ## Credits
 
 This repository is based on a heavily modified fork
 of [pytorch-template](https://github.com/victoresque/pytorch-template) repository.
-
-## Docker
-
-You can use this project with docker. Quick start:
-
-```bash 
-docker build -t my_hw_asr_image . 
-docker run \
-   --gpus '"device=0"' \
-   -it --rm \
-   -v /path/to/local/storage/dir:/repos/asr_project_template/data/datasets \
-   -e WANDB_API_KEY=<your_wandb_api_key> \
-	my_hw_asr_image python -m unittest 
-```
-
-Notes:
-
-* `-v /out/of/container/path:/inside/container/path` -- bind mount a path, so you wouldn't have to download datasets at
-  the start of every docker run.
-* `-e WANDB_API_KEY=<your_wandb_api_key>` -- set envvar for wandb (if you want to use it). You can find your API key
-  here: https://wandb.ai/authorize
-
-## TODO
-
-These barebones can use more tests. We highly encourage students to create pull requests to add more tests / new
-functionality. Current demands:
-
-* Tests for beam search
-* README section to describe folders
-* Notebook to show how to work with `ConfigParser` and `config_parser.init_obj(...)`
