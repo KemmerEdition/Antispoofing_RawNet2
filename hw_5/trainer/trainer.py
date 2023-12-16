@@ -114,7 +114,7 @@ class Trainer(BaseTrainer):
                 self.writer.add_scalar(
                     "learning rate", self.lr_scheduler.get_last_lr()[0]
                 )
-                # self._log_predictions(**batch)
+
                 self._log_scalars(self.train_metrics)
                 # we don't want to reset train metrics at the start of every epoch
                 # because we are interested in recent train metrics
@@ -123,8 +123,6 @@ class Trainer(BaseTrainer):
             if batch_idx >= self.len_epoch:
                 break
         log = last_train_metrics
-        # if self.lr_scheduler is not None:
-        #     self.lr_scheduler.step()
 
         for part, dataloader in self.evaluation_dataloaders.items():
             val_log = self._evaluation_epoch(epoch, part, dataloader)
@@ -136,7 +134,7 @@ class Trainer(BaseTrainer):
         batch = self.move_batch_to_device(batch, self.device)
         outputs = self.model(**batch)
         batch.update(outputs)
-        # batch["loss"] = self.criterion(**batch)
+
         if is_train:
             loss = self.criterion(**batch)
             batch.update(loss)
@@ -144,11 +142,9 @@ class Trainer(BaseTrainer):
             self._clip_grad_norm()
             self.optimizer.step()
             self.lr_scheduler.step()
-            # self.train_metrics.update("grad_norm", self.get_grad_norm())
+
             self.optimizer.zero_grad()
             metrics.update("loss", batch["loss"].item())
-        # for met in self.metrics:
-        #     metrics.update(met.name, met(**batch))
         return batch
 
     def _evaluation_epoch(self, epoch, part, dataloader):
@@ -181,7 +177,6 @@ class Trainer(BaseTrainer):
                 self.evaluation_metrics.update(m.name, m(np.array(target_list), np.array(pred_list)))
             self.writer.set_step(epoch * self.len_epoch, part)
             self._log_scalars(self.evaluation_metrics)
-            # self._log_predictions(**batch)
 
         return self.evaluation_metrics.result()
 
@@ -194,34 +189,6 @@ class Trainer(BaseTrainer):
             current = batch_idx
             total = self.len_epoch
         return base.format(current, total, 100.0 * current / total)
-
-    # def _log_predictions(
-    #         self,
-    #         audio,
-    #         predicts,
-    #         target,
-    #         audio_path,
-    #         examples_to_log=3,
-    #         *args,
-    #         **kwargs,
-    # ):
-    #
-    #     if self.writer is None:
-    #         return
-    #     rows = {}
-    #     for pred, target, raw_pred, audio_path in tuples[:examples_to_log]:
-    #         target = BaseTextEncoder.normalize_text(target)
-    #         wer = calc_wer(target, pred) * 100
-    #         cer = calc_cer(target, pred) * 100
-    #
-    #         rows[Path(audio_path).name] = {
-    #             "target": target,
-    #             "raw prediction": raw_pred,
-    #             "predictions": pred,
-    #             "wer": wer,
-    #             "cer": cer,
-    #         }
-    #     self.writer.add_table("predictions", pd.DataFrame.from_dict(rows, orient="index"))
 
     @torch.no_grad()
     def get_grad_norm(self, norm_type=2):
@@ -242,6 +209,3 @@ class Trainer(BaseTrainer):
             return
         for metric_name in metric_tracker.keys():
             self.writer.add_scalar(f"{metric_name}", metric_tracker.avg(metric_name))
-
-    # def _log_audio(self, audio, sr, name):
-    #     self.writer.add_audio(f"Audio_{name}", audio, sample_rate=sr)
